@@ -38,5 +38,4 @@ Cette page contient les statistiques suivantes :
 À partir de la page statistiques, on peux aussi générer les fichiers suivant :
 
 - `shots_heatmap.png` : Carte de chaleur des positions ciblées
-- `game_length_histogram.png` : Histogramme de la durée des parties
 - `statistics_report.txt` : Rapport textuel des statistiques

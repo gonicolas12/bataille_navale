@@ -49,13 +49,21 @@ class GameStatistics:
             lambda x: x.sort_values('turn', ascending=False).iloc[0]
         )
         
-        # Une partie est gagnée quand le dernier résultat est "sunk" et que tous les navires sont coulés
-        wins = game_results[game_results['result'] == 'sunk'].groupby('player').size()
+        # Si player == "player" a fait un "sunk" au dernier tour, alors "ai" gagne
+        # Si player == "ai" a fait un "sunk" au dernier tour, alors "player" gagne
         
-        return {
-            "player": wins.get("player", 0),
-            "ai": wins.get("ai", 0)
-        }
+        wins = {"player": 0, "ai": 0}
+        
+        for _, row in game_results.iterrows():
+            if row['result'] == 'sunk':
+                # Si le joueur a coulé un navire au dernier tour, l'IA a perdu
+                if row['player'] == 'player':
+                    wins['player'] += 1
+                # Si l'IA a coulé un navire au dernier tour, le joueur a perdu
+                elif row['player'] == 'ai':
+                    wins['ai'] += 1
+        
+        return wins
     
     def get_hit_miss_ratio(self):
         """

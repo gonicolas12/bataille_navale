@@ -27,6 +27,9 @@ Ce projet est un jeu de bataille navale dans lequel un joueur humain affronte un
 1. Clonez ce dépôt :
 ```
 git clone https://github.com/gonicolas12/bataille_navale.git
+```
+
+```
 cd bataille-navale
 ```
 

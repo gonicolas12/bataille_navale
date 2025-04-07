@@ -3,10 +3,12 @@ Module pour l'affichage des statistiques dans l'interface graphique.
 """
 
 import tkinter as tk
-from tkinter import Frame, Label, Button, Toplevel
+from tkinter import Frame, Label, Button, Toplevel, font
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
+import numpy as np
+import pandas as pd
 
 class StatisticsView:
     """Classe pour l'affichage des statistiques de jeu."""
@@ -29,12 +31,39 @@ class StatisticsView:
         
         # Définir les couleurs par défaut si non fournies
         self.colors = colors or {
-            "background": "#3a4f6a",
-            "text": "white",
-            "button_success": "#2ecc71",
-            "button_info": "#3498db",
-            "button_danger": "#e74c3c"
+            "background": "#0a192f",  # Bleu nuit profond
+            "text": "#e2e8f0",  # Blanc cassé
+            "button_success": "#10b981",  # Vert
+            "button_info": "#3b82f6",  # Bleu
+            "button_danger": "#ef4444"  # Rouge
         }
+        
+        # Charger les polices personnalisées
+        self.load_custom_fonts()
+    
+    def load_custom_fonts(self):
+        """Charge les polices personnalisées si disponibles, sinon utilise des alternatives système."""
+        # Liste des polices à essayer dans l'ordre de préférence
+        title_fonts = ["Montserrat", "Verdana", "Arial", "Helvetica"]
+        text_fonts = ["Roboto", "Segoe UI", "Tahoma", "Arial"]
+        
+        # Trouver la première police disponible pour les titres
+        self.title_font = None
+        for font_name in title_fonts:
+            if font_name.lower() in [f.lower() for f in font.families()]:
+                self.title_font = font_name
+                break
+        if not self.title_font:
+            self.title_font = "TkDefaultFont"  # Police par défaut si aucune n'est disponible
+        
+        # Trouver la première police disponible pour le texte
+        self.text_font = None
+        for font_name in text_fonts:
+            if font_name.lower() in [f.lower() for f in font.families()]:
+                self.text_font = font_name
+                break
+        if not self.text_font:
+            self.text_font = "TkDefaultFont"  # Police par défaut si aucune n'est disponible
     
     def show_statistics_window(self):
         """Affiche une fenêtre avec les statistiques de jeu."""
@@ -54,11 +83,11 @@ class StatisticsView:
         self.stats_window = Toplevel(self.parent)
         StatisticsView.stats_window_instance = self.stats_window
         
-        self.stats_window.title("Statistiques de jeu - Bataille Navale")
-        # Augmenter la taille de la fenêtre
-        self.stats_window.geometry("1000x700")
-        self.stats_window.configure(bg=self.colors["background"])
+        self.stats_window.title("⚓ Statistiques Navales - Bataille Navale ⚓")
         
+        # Maximiser la fenêtre au lieu d'utiliser le mode plein écran
+        self.stats_window.state('zoomed')  # Pour Windows
+                
         # Configurer le gestionnaire de fermeture pour nettoyer la référence
         self.stats_window.protocol("WM_DELETE_WINDOW", self._on_closing)
         
@@ -66,28 +95,38 @@ class StatisticsView:
         main_frame = Frame(self.stats_window, bg=self.colors["background"])
         main_frame.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
         
-        # Frame pour le titre
-        title_frame = Frame(main_frame, bg=self.colors["background"])
-        title_frame.pack(fill=tk.X, pady=(0, 20))
+        # Frame pour le titre avec une bordure décorative
+        title_frame = Frame(
+            main_frame, 
+            bg=self.colors["background"],
+            highlightbackground="#60a5fa",  # Bleu ciel
+            highlightthickness=2
+        )
+        title_frame.pack(fill=tk.X, pady=(0, 25))
         
         Label(
             title_frame,
-            text="STATISTIQUES DE JEU",
-            font=("Arial", 18, "bold"),
+            text="⚓ STATISTIQUES DE BATAILLE NAVALE ⚓",
+            font=(self.title_font, 22, "bold"),
             bg=self.colors["background"],
-            fg=self.colors["text"]
-        ).pack()
+            fg="#60a5fa"  # Bleu ciel
+        ).pack(pady=15)
         
-        # Frame pour les graphiques
-        graphs_frame = Frame(main_frame, bg=self.colors["background"])
-        graphs_frame.pack(fill=tk.BOTH, expand=True)
+        # Frame pour les graphiques avec une bordure décorative
+        graphs_frame = Frame(
+            main_frame, 
+            bg=self.colors["background"],
+            highlightbackground="#8892b0",  # Gris bleuté
+            highlightthickness=1
+        )
+        graphs_frame.pack(fill=tk.BOTH, expand=True, pady=10)
         
-        # Créer les figures pour matplotlib avec une taille plus grande
+        # Créer les figures pour matplotlib avec une taille plus grande et un style moderne
         self._create_win_distribution_graph(graphs_frame)
         self._create_hit_rate_graph(graphs_frame)
         
-        # Frame pour les statistiques textuelles
-        text_stats_frame = Frame(main_frame, bg=self.colors["background"])
+        # Frame pour les statistiques textuelles avec un fond légèrement différent
+        text_stats_frame = Frame(main_frame, bg="#172a45")  # Bleu marine
         text_stats_frame.pack(fill=tk.X, pady=20)
         
         # Afficher quelques statistiques textuelles
@@ -95,56 +134,89 @@ class StatisticsView:
         wins = self.stats_manager.get_wins_by_player()
         total_games = wins["player"] + wins["ai"]
         
-        stats_text = (
-            f"Parties jouées: {total_games}  |  "
-            f"Durée moyenne: {avg_game_length:.1f} tours  |  "
-            f"Victoires joueur: {wins['player']}  |  "
-            f"Victoires IA: {wins['ai']}"
-        )
-        Label(
+        # Améliorer l'affichage des statistiques avec des emojis et un meilleur formatage
+        stats_label = Label(
             text_stats_frame,
-            text=stats_text,
-            font=("Arial", 12),
-            bg=self.colors["background"],
-            fg=self.colors["text"]
-        ).pack(pady=10)
+            bg="#172a45",  # Bleu marine
+            fg=self.colors["text"],
+            font=(self.text_font, 13),
+            justify=tk.CENTER,
+            padx=20,
+            pady=15
+        )
+        stats_label.pack(fill=tk.X)
         
-        # Frame pour les boutons (centré)
+        stats_text = (
+            f"🎮 Parties jouées: {total_games}   |   "
+            f"⏱️ Durée moyenne: {avg_game_length:.1f} tours   |   "
+            f"🏆 Victoires joueur: {wins['player']}   |   "
+            f"🤖 Victoires IA: {wins['ai']}"
+        )
+        stats_label.config(text=stats_text)
+        
+        # Frame pour les boutons avec un espace
         buttons_frame = Frame(main_frame, bg=self.colors["background"])
-        buttons_frame.pack(pady=(0, 20))
+        buttons_frame.pack(pady=(15, 20))
+        
+        # Style commun pour les boutons
+        button_style = {
+            "font": (self.text_font, 12),
+            "width": 18,
+            "height": 2,
+            "borderwidth": 0,
+            "cursor": "hand2"  # Curseur main au survol
+        }
         
         # Bouton pour générer une heatmap
-        Button(
+        heatmap_btn = Button(
             buttons_frame,
             text="Générer Heatmap",
-            font=("Arial", 12),
             bg=self.colors["button_success"],
             fg="white",
-            width=15,
-            command=self._generate_heatmap
-        ).grid(row=0, column=0, padx=10, pady=10)
+            activebackground="#059669",  # Vert foncé
+            activeforeground="white",
+            command=self._generate_heatmap,
+            **button_style
+        )
+        heatmap_btn.grid(row=0, column=0, padx=15, pady=10)
+        
+        # Effet de survol
+        heatmap_btn.bind("<Enter>", lambda e: heatmap_btn.config(bg="#059669"))
+        heatmap_btn.bind("<Leave>", lambda e: heatmap_btn.config(bg=self.colors["button_success"]))
         
         # Bouton pour exporter un rapport
-        Button(
+        export_btn = Button(
             buttons_frame,
             text="Exporter Rapport",
-            font=("Arial", 12),
             bg=self.colors["button_info"],
             fg="white",
-            width=15,
-            command=self._export_report
-        ).grid(row=0, column=1, padx=10, pady=10)
+            activebackground="#2563eb",  # Bleu plus foncé
+            activeforeground="white",
+            command=self._export_report,
+            **button_style
+        )
+        export_btn.grid(row=0, column=1, padx=15, pady=10)
+        
+        # Effet de survol
+        export_btn.bind("<Enter>", lambda e: export_btn.config(bg="#2563eb"))
+        export_btn.bind("<Leave>", lambda e: export_btn.config(bg=self.colors["button_info"]))
         
         # Bouton pour fermer la fenêtre
-        Button(
+        close_btn = Button(
             buttons_frame,
             text="Fermer",
-            font=("Arial", 12),
             bg=self.colors["button_danger"],
             fg="white",
-            width=15,
-            command=self._on_closing
-        ).grid(row=0, column=2, padx=10, pady=10)
+            activebackground="#dc2626",  # Rouge plus foncé
+            activeforeground="white",
+            command=self._on_closing,
+            **button_style
+        )
+        close_btn.grid(row=0, column=2, padx=15, pady=10)
+        
+        # Effet de survol
+        close_btn.bind("<Enter>", lambda e: close_btn.config(bg="#dc2626"))
+        close_btn.bind("<Leave>", lambda e: close_btn.config(bg=self.colors["button_danger"]))
     
     def _on_closing(self):
         """Gère la fermeture de la fenêtre de statistiques."""
@@ -159,32 +231,51 @@ class StatisticsView:
         Args:
             parent_frame (tk.Frame): Frame parent pour le graphique
         """
-        # Créer un conteneur pour le graphique (pour le centrage)
+        # Créer un conteneur pour le graphique
         graph_container = Frame(parent_frame, bg=self.colors["background"])
-        graph_container.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
+        graph_container.grid(row=0, column=0, padx=20, pady=15, sticky="nsew")
         
         # Obtenir les données
         wins = self.stats_manager.get_wins_by_player()
         
+        # Configurer le style de matplotlib
+        plt.style.use('dark_background')
+        
         # Créer la figure avec une taille plus grande
         fig = plt.figure(figsize=(5, 4), dpi=100)
+        fig.patch.set_facecolor('#172a45')  # Couleur de fond
+        
         ax = fig.add_subplot(111)
+        ax.set_facecolor('#172a45')  # Couleur de fond du graphique
+        
+        # Couleurs modernes pour les barres
+        colors = ['#60a5fa', '#f97316']  # Bleu et orange
         
         # Tracer le graphique
-        bars = ax.bar(['Joueur', 'IA'], [wins["player"], wins["ai"]], color=['#3498db', '#e74c3c'])
-        ax.set_title('Distribution des victoires', fontsize=14)
-        ax.set_ylabel('Nombre de victoires', fontsize=12)
+        bars = ax.bar(['Joueur', 'IA'], [wins["player"], wins["ai"]], color=colors, width=0.6, edgecolor='none', alpha=0.9)
+        
+        # Ajouter un titre
+        ax.set_title('Distribution des Victoires', fontsize=16, color='white', pad=15)
+        
+        # Personnaliser les axes
+        ax.set_ylabel('Nombre de victoires', fontsize=12, color='white', labelpad=10)
+        ax.tick_params(axis='both', colors='white', labelsize=11)
         
         # S'assurer que l'axe y commence à 0 et a une valeur minimale de 5
         ax.set_ylim(0, max(5, wins["player"] + 1, wins["ai"] + 1))
         
-        ax.grid(axis='y', linestyle='--', alpha=0.7)
+        # Grille plus subtile
+        ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
         
         # Ajouter les valeurs sur les barres
         for bar in bars:
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height + 0.1,
-                    str(int(height)), ha='center', va='bottom', fontsize=12)
+                    str(int(height)), ha='center', va='bottom', fontsize=14, color='white', fontweight='bold')
+        
+        # Supprimer les bordures du graphique
+        for spine in ax.spines.values():
+            spine.set_visible(False)
         
         # Ajouter de l'espace autour du graphique
         fig.tight_layout(pad=3.0)
@@ -197,11 +288,11 @@ class StatisticsView:
         # Ajouter un titre au cadre
         Label(
             graph_container,
-            text="Distribution des victoires",
-            font=("Arial", 12, "bold"),
+            text="Distribution des Victoires",
+            font=(self.title_font, 14, "bold"),
             bg=self.colors["background"],
-            fg=self.colors["text"]
-        ).pack()
+            fg="#60a5fa"  # Bleu ciel
+        ).pack(pady=(15, 5))
     
     def _create_hit_rate_graph(self, parent_frame):
         """
@@ -210,9 +301,9 @@ class StatisticsView:
         Args:
             parent_frame (tk.Frame): Frame parent pour le graphique
         """
-        # Créer un conteneur pour le graphique (pour le centrage)
+        # Créer un conteneur pour le graphique
         graph_container = Frame(parent_frame, bg=self.colors["background"])
-        graph_container.grid(row=0, column=1, padx=20, pady=10, sticky="nsew")
+        graph_container.grid(row=0, column=1, padx=20, pady=15, sticky="nsew")
         
         # Configurer le système de grille pour centrer les graphiques
         parent_frame.columnconfigure(0, weight=1)
@@ -222,22 +313,44 @@ class StatisticsView:
         # Obtenir les données
         hit_rates = self.stats_manager.get_hit_miss_ratio()
         
+        # Configurer le style de matplotlib
+        plt.style.use('dark_background')
+        
         # Créer la figure avec une taille plus grande
         fig = plt.figure(figsize=(5, 4), dpi=100)
+        fig.patch.set_facecolor('#172a45')  # Couleur de fond
+        
         ax = fig.add_subplot(111)
+        ax.set_facecolor('#172a45')  # Couleur de fond du graphique
+        
+        # Couleurs modernes pour les barres
+        colors = ['#60a5fa', '#f97316']  # Bleu et orange
         
         # Tracer le graphique
-        bars = ax.bar(['Joueur', 'IA'], [hit_rates["player"] * 100, hit_rates["ai"] * 100], color=['#3498db', '#e74c3c'])
-        ax.set_title('Taux de réussite des tirs (%)', fontsize=14)
-        ax.set_ylabel('Pourcentage (%)', fontsize=12)
+        bars = ax.bar(['Joueur', 'IA'], [hit_rates["player"] * 100, hit_rates["ai"] * 100], color=colors, width=0.6, edgecolor='none', alpha=0.9)
+        
+        # Ajouter un titre
+        ax.set_title('Taux de Réussite des Tirs (%)', fontsize=16, color='white', pad=15)
+        
+        # Personnaliser les axes
+        ax.set_ylabel('Pourcentage (%)', fontsize=12, color='white', labelpad=10)
+        ax.tick_params(axis='both', colors='white', labelsize=11)
+        
+        # Configurer l'axe y
         ax.set_ylim(0, 100)
-        ax.grid(axis='y', linestyle='--', alpha=0.7)
+        
+        # Grille plus subtile
+        ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
         
         # Ajouter les valeurs sur les barres
         for bar in bars:
             height = bar.get_height()
             ax.text(bar.get_x() + bar.get_width()/2., height + 1,
-                    f"{height:.1f}%", ha='center', va='bottom', fontsize=12)
+                    f"{height:.1f}%", ha='center', va='bottom', fontsize=14, color='white', fontweight='bold')
+        
+        # Supprimer les bordures du graphique
+        for spine in ax.spines.values():
+            spine.set_visible(False)
         
         # Ajouter de l'espace autour du graphique
         fig.tight_layout(pad=3.0)
@@ -250,60 +363,100 @@ class StatisticsView:
         # Ajouter un titre au cadre
         Label(
             graph_container,
-            text="Taux de réussite des tirs",
-            font=("Arial", 12, "bold"),
+            text="Taux de Réussite des Tirs",
+            font=(self.title_font, 14, "bold"),
             bg=self.colors["background"],
-            fg=self.colors["text"]
-        ).pack()
+            fg="#60a5fa"  # Bleu ciel
+        ).pack(pady=(15, 5))
     
     def _generate_heatmap(self):
         """Génère et affiche une heatmap des positions ciblées."""
         # Créer le dossier data s'il n'existe pas
         os.makedirs("data", exist_ok=True)
         
-        # Générer la heatmap
+        # Générer la heatmap avec un style moderne
         file_path = "data/shots_heatmap.png"
-        self.stats_manager.generate_heatmap(file_path)
         
-        # Informer l'utilisateur
-        info_window = Toplevel(self.stats_window)
-        info_window.title("Heatmap générée")
-        info_window.geometry("400x150")
-        info_window.configure(bg=self.colors["background"])
-        info_window.resizable(False, False)
+        # Configurer matplotlib pour un style moderne
+        plt.style.use('dark_background')
         
-        # Centrer sur l'écran
-        info_window.update_idletasks()
-        width = info_window.winfo_width()
-        height = info_window.winfo_height()
-        x = (info_window.winfo_screenwidth() // 2) - (width // 2)
-        y = (info_window.winfo_screenheight() // 2) - (height // 2)
-        info_window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        # Charger les données pour la heatmap
+        self.stats_manager.reload_data()
+        game_data = self.stats_manager.game_data
         
-        Label(
-            info_window,
-            text="Heatmap générée avec succès !",
-            font=("Arial", 14),
-            bg=self.colors["background"],
-            fg=self.colors["text"]
-        ).pack(pady=(20, 10))
+        if game_data.empty:
+            self._show_info_dialog(
+                "Aucune donnée disponible", 
+                "Il n'y a pas de données suffisantes pour générer une heatmap."
+            )
+            return
         
-        Label(
-            info_window,
-            text=f"Fichier sauvegardé: {file_path}",
-            font=("Arial", 10),
-            bg=self.colors["background"],
-            fg=self.colors["text"]
-        ).pack(pady=10)
+        # Créer une matrice 10x10 pour stocker le nombre de tirs à chaque position
+        heatmap_data = np.zeros((10, 10))
         
-        Button(
-            info_window,
-            text="OK",
-            font=("Arial", 12),
-            bg=self.colors["button_info"],
-            fg="white",
-            command=info_window.destroy
-        ).pack(pady=10)
+        # Parcourir les données pour remplir la heatmap
+        for _, row in game_data.iterrows():
+            if pd.notna(row['position']):  # Vérifier que la position n'est pas NaN
+                position = row['position'].split(',')
+                if len(position) == 2:  # Vérifier que la position est valide
+                    try:
+                        x, y = int(position[0]), int(position[1])
+                        if 0 <= x < 10 and 0 <= y < 10:
+                            heatmap_data[x][y] += 1
+                    except ValueError:
+                        # Ignorer les positions mal formatées
+                        pass
+        
+        # Créer la figure avec un style moderne
+        fig = plt.figure(figsize=(10, 8))
+        fig.patch.set_facecolor('#0a192f')  # Couleur de fond
+        
+        ax = fig.add_subplot(111)
+        ax.set_facecolor('#172a45')  # Couleur de fond du graphique
+        
+        # Améliorer l'apparence de la heatmap
+        cmap = plt.cm.hot  # Utiliser la colormap "hot" pour la heatmap
+        img = ax.imshow(heatmap_data, cmap=cmap, interpolation='nearest')
+        
+        # Ajouter une barre de couleur
+        cbar = plt.colorbar(img, ax=ax, pad=0.01)
+        cbar.set_label('Nombre de tirs', color='white', fontsize=12, labelpad=15)
+        cbar.ax.tick_params(colors='white')
+        
+        # Ajouter un titre
+        ax.set_title('Heatmap des Positions Ciblées', color='white', fontsize=18, pad=20)
+        
+        # Personnaliser les axes
+        ax.set_xlabel('Colonne (A-J)', color='white', fontsize=12, labelpad=10)
+        ax.set_ylabel('Ligne (1-10)', color='white', fontsize=12, labelpad=10)
+        
+        # Ajout des indices de lignes et colonnes
+        # Convertir les indices de colonnes en lettres (A-J)
+        column_labels = [chr(65 + i) for i in range(10)]
+        ax.set_xticks(np.arange(10))
+        ax.set_xticklabels(column_labels, fontsize=11, color='white')
+        
+        # Convertir les indices de lignes en nombres (1-10)
+        row_labels = [str(i + 1) for i in range(10)]
+        ax.set_yticks(np.arange(10))
+        ax.set_yticklabels(row_labels, fontsize=11, color='white')
+        
+        # Ajout des lignes de grille
+        ax.grid(color='white', linestyle='-', linewidth=0.5, alpha=0.3)
+        plt.setp(ax.get_xticklabels(), ha="center")
+        
+        # Ajuster les marges
+        plt.tight_layout()
+        
+        # Sauvegarder la figure
+        plt.savefig(file_path, dpi=150, bbox_inches='tight')
+        plt.close()
+        
+        # Informer l'utilisateur avec une boîte de dialogue
+        self._show_info_dialog(
+            "Heatmap Générée",
+            f"Heatmap générée avec succès !\nFichier sauvegardé: {file_path}"
+        )
     
     def _export_report(self):
         """Exporte un rapport textuel des statistiques."""
@@ -314,42 +467,91 @@ class StatisticsView:
         file_path = "data/statistics_report.txt"
         self.stats_manager.export_statistics_report(file_path)
         
-        # Informer l'utilisateur
-        info_window = Toplevel(self.stats_window)
-        info_window.title("Rapport exporté")
-        info_window.geometry("400x150")
-        info_window.configure(bg=self.colors["background"])
-        info_window.resizable(False, False)
+        # Informer l'utilisateur avec une boîte de dialogue
+        self._show_info_dialog(
+            "Rapport Exporté",
+            f"Rapport exporté avec succès !\nFichier sauvegardé: {file_path}"
+        )
+    
+    def _show_info_dialog(self, title, message):
+        """
+        Affiche une boîte de dialogue d'information.
         
-        # Centrer sur l'écran
-        info_window.update_idletasks()
-        width = info_window.winfo_width()
-        height = info_window.winfo_height()
-        x = (info_window.winfo_screenwidth() // 2) - (width // 2)
-        y = (info_window.winfo_screenheight() // 2) - (height // 2)
-        info_window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        Args:
+            title (str): Titre de la boîte de dialogue
+            message (str): Message à afficher
+        """
+        # Créer une fenêtre de dialogue personnalisée
+        dialog = Toplevel(self.stats_window)
+        dialog.title(title)
+        dialog.geometry("450x200")
+        dialog.configure(bg=self.colors["background"])
+        dialog.resizable(False, False)
+        
+        # Rendre la fenêtre modale
+        dialog.transient(self.stats_window)
+        dialog.grab_set()
+        
+        # Centrer sur l'écran parent
+        dialog.update_idletasks()
+        parent_x = self.stats_window.winfo_x()
+        parent_y = self.stats_window.winfo_y()
+        parent_width = self.stats_window.winfo_width()
+        parent_height = self.stats_window.winfo_height()
+        
+        width = dialog.winfo_width()
+        height = dialog.winfo_height()
+        
+        x = parent_x + (parent_width // 2) - (width // 2)
+        y = parent_y + (parent_height // 2) - (height // 2)
+        
+        dialog.geometry(f"{width}x{height}+{x}+{y}")
         
         Label(
-            info_window,
-            text="Rapport exporté avec succès !",
-            font=("Arial", 14),
+            dialog,
+            text=title,
+            font=(self.title_font, 16, "bold"),
             bg=self.colors["background"],
-            fg=self.colors["text"]
+            fg="#60a5fa"  # Bleu ciel
         ).pack(pady=(20, 10))
         
         Label(
-            info_window,
-            text=f"Fichier sauvegardé: {file_path}",
-            font=("Arial", 10),
+            dialog,
+            text=message,
+            font=(self.text_font, 12),
             bg=self.colors["background"],
-            fg=self.colors["text"]
-        ).pack(pady=10)
+            fg=self.colors["text"],
+            justify=tk.CENTER,
+            wraplength=400
+        ).pack(pady=10, padx=20)
         
-        Button(
-            info_window,
+        ok_button = Button(
+            dialog,
             text="OK",
-            font=("Arial", 12),
+            font=(self.text_font, 12),
             bg=self.colors["button_info"],
             fg="white",
-            command=info_window.destroy
-        ).pack(pady=10)
+            activebackground="#2563eb",  # Bleu foncé
+            activeforeground="white",
+            command=dialog.destroy,
+            width=10,
+            borderwidth=0,
+            cursor="hand2"
+        )
+        ok_button.pack(pady=15)
+        
+        # Effet de survol
+        ok_button.bind("<Enter>", lambda e: ok_button.config(bg="#2563eb"))
+        ok_button.bind("<Leave>", lambda e: ok_button.config(bg=self.colors["button_info"]))
+        
+        # Centrer le bouton
+        dialog.update_idletasks()
+        
+        # Mettre le focus sur le bouton OK
+        ok_button.focus_set()
+        
+        # Lier la touche Entrée au bouton OK
+        dialog.bind("<Return>", lambda event: dialog.destroy())
+        
+        # Attendre que la fenêtre soit fermée
+        dialog.wait_window()

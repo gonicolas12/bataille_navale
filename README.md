@@ -117,7 +117,10 @@ Génère les statistiques et graphiques à partir des données enregistrées.
 
 ## Captures d'écran
 
+### Menu principal
 ![Capture d'écran du menu principal](img/Capture1.png)
+
+### Menu statistiques
 ![Capture d'écran du menu statistiques](img/Capture2.png)
 
 ## Auteur

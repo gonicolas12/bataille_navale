@@ -115,6 +115,11 @@ Génère les statistiques et graphiques à partir des données enregistrées.
 - ✅ Configuration IA : Implémentation complète des 5 points requis
 - ✅ Interface graphique : Réalisée avec Tkinter
 
+## Captures d'écran
+
+![Capture d'écran du menu principal](img/Capture d'écran Menu.png)
+![Capture d'écran du menu statistiques](img/Capture d'écran Statistiques.png)
+
 ## Auteur
 
 - [@nicolasgouy](https://www.github.com/gonicolas12)

@@ -31,11 +31,11 @@ class StatisticsView:
         
         # Définir les couleurs par défaut si non fournies
         self.colors = colors or {
-            "background": "#0a192f",  # Bleu nuit profond
-            "text": "#e2e8f0",  # Blanc cassé
-            "button_success": "#10b981",  # Vert
-            "button_info": "#3b82f6",  # Bleu
-            "button_danger": "#ef4444"  # Rouge
+            "background": "#0a192f",
+            "text": "#e2e8f0",
+            "button_success": "#10b981",
+            "button_info": "#3b82f6",
+            "button_danger": "#ef4444"
         }
         
         # Charger les polices personnalisées
@@ -43,7 +43,7 @@ class StatisticsView:
     
     def load_custom_fonts(self):
         """Charge les polices personnalisées si disponibles, sinon utilise des alternatives système."""
-        # Liste des polices à essayer dans l'ordre de préférence
+        # Liste des polices possibles
         title_fonts = ["Montserrat", "Verdana", "Arial", "Helvetica"]
         text_fonts = ["Roboto", "Segoe UI", "Tahoma", "Arial"]
         
@@ -54,7 +54,7 @@ class StatisticsView:
                 self.title_font = font_name
                 break
         if not self.title_font:
-            self.title_font = "TkDefaultFont"  # Police par défaut si aucune n'est disponible
+            self.title_font = "TkDefaultFont"
         
         # Trouver la première police disponible pour le texte
         self.text_font = None
@@ -63,7 +63,7 @@ class StatisticsView:
                 self.text_font = font_name
                 break
         if not self.text_font:
-            self.text_font = "TkDefaultFont"  # Police par défaut si aucune n'est disponible
+            self.text_font = "TkDefaultFont"
     
     def show_statistics_window(self):
         """Affiche une fenêtre avec les statistiques de jeu."""
@@ -99,7 +99,7 @@ class StatisticsView:
         title_frame = Frame(
             main_frame, 
             bg=self.colors["background"],
-            highlightbackground="#60a5fa",  # Bleu ciel
+            highlightbackground="#60a5fa",
             highlightthickness=2
         )
         title_frame.pack(fill=tk.X, pady=(0, 25))
@@ -109,14 +109,14 @@ class StatisticsView:
             text="⚓ STATISTIQUES DE BATAILLE NAVALE ⚓",
             font=(self.title_font, 22, "bold"),
             bg=self.colors["background"],
-            fg="#60a5fa"  # Bleu ciel
+            fg="#60a5fa"
         ).pack(pady=15)
         
         # Frame pour les graphiques avec une bordure décorative
         graphs_frame = Frame(
             main_frame, 
             bg=self.colors["background"],
-            highlightbackground="#8892b0",  # Gris bleuté
+            highlightbackground="#8892b0",
             highlightthickness=1
         )
         graphs_frame.pack(fill=tk.BOTH, expand=True, pady=10)
@@ -126,7 +126,7 @@ class StatisticsView:
         self._create_hit_rate_graph(graphs_frame)
         
         # Frame pour les statistiques textuelles avec un fond légèrement différent
-        text_stats_frame = Frame(main_frame, bg="#172a45")  # Bleu marine
+        text_stats_frame = Frame(main_frame, bg="#172a45")
         text_stats_frame.pack(fill=tk.X, pady=20)
         
         # Afficher quelques statistiques textuelles
@@ -137,7 +137,7 @@ class StatisticsView:
         # Améliorer l'affichage des statistiques avec des emojis et un meilleur formatage
         stats_label = Label(
             text_stats_frame,
-            bg="#172a45",  # Bleu marine
+            bg="#172a45",
             fg=self.colors["text"],
             font=(self.text_font, 13),
             justify=tk.CENTER,
@@ -164,7 +164,7 @@ class StatisticsView:
             "width": 18,
             "height": 2,
             "borderwidth": 0,
-            "cursor": "hand2"  # Curseur main au survol
+            "cursor": "hand2"
         }
         
         # Bouton pour générer une heatmap
@@ -173,7 +173,7 @@ class StatisticsView:
             text="Générer Heatmap",
             bg=self.colors["button_success"],
             fg="white",
-            activebackground="#059669",  # Vert foncé
+            activebackground="#059669",
             activeforeground="white",
             command=self._generate_heatmap,
             **button_style
@@ -190,7 +190,7 @@ class StatisticsView:
             text="Exporter Rapport",
             bg=self.colors["button_info"],
             fg="white",
-            activebackground="#2563eb",  # Bleu plus foncé
+            activebackground="#2563eb",
             activeforeground="white",
             command=self._export_report,
             **button_style
@@ -207,7 +207,7 @@ class StatisticsView:
             text="Fermer",
             bg=self.colors["button_danger"],
             fg="white",
-            activebackground="#dc2626",  # Rouge plus foncé
+            activebackground="#dc2626",
             activeforeground="white",
             command=self._on_closing,
             **button_style
@@ -248,8 +248,7 @@ class StatisticsView:
         ax = fig.add_subplot(111)
         ax.set_facecolor('#172a45')  # Couleur de fond du graphique
         
-        # Couleurs modernes pour les barres
-        colors = ['#60a5fa', '#f97316']  # Bleu et orange
+        colors = ['#60a5fa', '#f97316']
         
         # Tracer le graphique
         bars = ax.bar(['Joueur', 'IA'], [wins["player"], wins["ai"]], color=colors, width=0.6, edgecolor='none', alpha=0.9)
@@ -264,7 +263,6 @@ class StatisticsView:
         # S'assurer que l'axe y commence à 0 et a une valeur minimale de 5
         ax.set_ylim(0, max(5, wins["player"] + 1, wins["ai"] + 1))
         
-        # Grille plus subtile
         ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
         
         # Ajouter les valeurs sur les barres
@@ -324,7 +322,7 @@ class StatisticsView:
         ax.set_facecolor('#172a45')  # Couleur de fond du graphique
         
         # Couleurs modernes pour les barres
-        colors = ['#60a5fa', '#f97316']  # Bleu et orange
+        colors = ['#60a5fa', '#f97316']
         
         # Tracer le graphique
         bars = ax.bar(['Joueur', 'IA'], [hit_rates["player"] * 100, hit_rates["ai"] * 100], color=colors, width=0.6, edgecolor='none', alpha=0.9)
@@ -512,7 +510,7 @@ class StatisticsView:
             text=title,
             font=(self.title_font, 16, "bold"),
             bg=self.colors["background"],
-            fg="#60a5fa"  # Bleu ciel
+            fg="#60a5fa"
         ).pack(pady=(20, 10))
         
         Label(
@@ -531,7 +529,7 @@ class StatisticsView:
             font=(self.text_font, 12),
             bg=self.colors["button_info"],
             fg="white",
-            activebackground="#2563eb",  # Bleu foncé
+            activebackground="#2563eb",
             activeforeground="white",
             command=dialog.destroy,
             width=10,
@@ -553,5 +551,4 @@ class StatisticsView:
         # Lier la touche Entrée au bouton OK
         dialog.bind("<Return>", lambda event: dialog.destroy())
         
-        # Attendre que la fenêtre soit fermée
         dialog.wait_window()

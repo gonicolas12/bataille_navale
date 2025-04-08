@@ -123,7 +123,7 @@ def apply_button_style(button, colors, hover=True):
         activeforeground=colors["button"]["fg"],
         relief="flat",
         borderwidth=0,
-        cursor="hand2"  # Curseur main au survol
+        cursor="hand2"
     )
     
     if hover:

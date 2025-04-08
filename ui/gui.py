@@ -115,12 +115,12 @@ class BattleshipGUI:
         """Anime le titre en faisant varier sa couleur."""
         # Liste de couleurs pour l'animation
         title_colors = [
-            self.colors["title"],  # Bleu ciel
-            "#4f46e5",  # Indigo
-            "#3b82f6",  # Bleu
-            "#0ea5e9",  # Bleu clair
-            "#3b82f6",  # Bleu
-            "#4f46e5",  # Indigo
+            self.colors["title"],
+            "#4f46e5",
+            "#3b82f6",
+            "#0ea5e9",
+            "#3b82f6",
+            "#4f46e5",
         ]
         
         # Obtenir l'index de la couleur actuelle
@@ -217,7 +217,7 @@ class BattleshipGUI:
             borderwidth=0,
             padx=10,
             pady=8,
-            cursor="hand2",  # Curseur main au survol
+            cursor="hand2",
             command=command
         )
         
@@ -479,8 +479,8 @@ class BattleshipGUI:
             self.controls_frame,
             text="Nouvelle Partie",
             command=self.new_game,
-            bg_color="#10b981",  # Vert
-            hover_color="#059669"  # Vert foncé
+            bg_color="#10b981",
+            hover_color="#059669"
         ).pack(pady=17, fill=tk.X, padx=25)
 
         # Bouton pour voir les statistiques
@@ -495,8 +495,8 @@ class BattleshipGUI:
             self.controls_frame,
             text="Quitter",
             command=self.root.quit,
-            bg_color="#ef4444",  # Rouge
-            hover_color="#dc2626"  # Rouge foncé
+            bg_color="#ef4444",
+            hover_color="#dc2626"
         ).pack(pady=17, fill=tk.X, padx=25)
 
         # Ajouter un espace flexible en dessous du bouton pour centrer verticalement

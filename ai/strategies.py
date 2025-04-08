@@ -109,7 +109,6 @@ class HuntTargetStrategy(BaseStrategy):
             # Ajouter aux hits
             self.hits.append(position)
             
-            # Ajouter des cibles adjacentes (les 4 directions)
             self._add_adjacent_targets(position, board)
             
         elif result == "miss":
@@ -121,7 +120,6 @@ class HuntTargetStrategy(BaseStrategy):
             
         elif isinstance(result, tuple) and result[0] == "sunk":
             # Trouver quels hits appartiennent au navire coulé
-            # Note: ceci suppose que board.shots contient toutes les positions déjà ciblées
             sunk_ship = []
             for pos in self.hits:
                 # Vérifier si ce hit appartient au navire qui vient d'être coulé
@@ -158,7 +156,6 @@ class HuntTargetStrategy(BaseStrategy):
                 target not in board.shots and
                 target not in self.targets):
                 
-                # Essayer d'être intelligent sur l'ordre des cibles
                 # Si on a plusieurs hits, prioriser les cibles alignées
                 if len(self.hits) > 1:
                     aligned = False
@@ -261,7 +258,7 @@ class HuntTargetStrategy(BaseStrategy):
             if (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
                 return 0.1  # Score très faible, mais pas négatif
         
-        return 0.0  # Score par défaut
+        return 0.0
 
 
 class HistoricalDataStrategy(BaseStrategy):
@@ -307,5 +304,4 @@ class HistoricalDataStrategy(BaseStrategy):
         if hits + misses == 0:
             return 0.0
         
-        # Retourner le taux de réussite
         return hits / (hits + misses) * 10  # Multiplier par 10 pour donner plus de poids

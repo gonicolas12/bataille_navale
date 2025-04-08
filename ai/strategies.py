@@ -90,149 +90,113 @@ class HuntTargetStrategy(BaseStrategy):
     
     def __init__(self):
         """Initialise la stratégie."""
-        self.hits = []  # Liste de toutes les touches actuelles (non coulées)
-        self.hit_stack = []  # Cases à explorer
-        self.direction = None  # Direction identifiée (horizontal ou vertical)
+        self.hits = []  # Touches non coulées
+        self.targets = []  # Cibles prioritaires
+        self.known_misses = set()  # Positions où on a déjà tiré et raté
+        self.ships_sunk = []  # Positions des navires déjà coulés
     
     def process_result(self, position, result, board):
         """
-        Traite le résultat d'un tir pour mettre à jour la stratégie.
+        Traite le résultat d'un tir.
         
         Args:
             position (tuple): Position (x, y) du tir
             result (str ou tuple): Résultat du tir ('miss', 'hit' ou ('sunk', ship_name))
             board (Board): La grille de jeu
         """
-        x, y = position
-        
+        # Traiter selon le résultat
         if result == "hit":
-            # Ajouter la position à la liste des touches
+            # Ajouter aux hits
             self.hits.append(position)
             
-            # Déterminer s'il y a une direction (horizontal ou vertical)
-            if len(self.hits) >= 2:
-                self.identify_direction()
+            # Ajouter des cibles adjacentes (les 4 directions)
+            self._add_adjacent_targets(position, board)
             
-            # Si une direction est identifiée, ajouter seulement les positions dans cette direction
-            if self.direction:
-                self.add_directional_targets(position, board)
-            else:
-                # Sinon, ajouter toutes les positions adjacentes
-                adjacent_positions = [
-                    (x+1, y), (x-1, y), (x, y+1), (x, y-1)
-                ]
-                
-                # Filtrer les positions valides (dans la grille et non tirées)
-                for pos in adjacent_positions:
-                    px, py = pos
-                    if 0 <= px < board.size and 0 <= py < board.size and pos not in board.shots:
-                        self.hit_stack.append(pos)
-        
         elif result == "miss":
-            # Si on rate un tir alors qu'on suivait une direction, il faut essayer dans l'autre sens
-            if self.direction and len(self.hits) >= 2:
-                self.add_opposite_direction_targets(board)
-        
+            # Ajouter aux misses connus
+            self.known_misses.add(position)
+            
+            # Si on a des cibles qui ne sont pas valides à cause d'un miss, les retirer
+            self.targets = [t for t in self.targets if t not in self.known_misses]
+            
         elif isinstance(result, tuple) and result[0] == "sunk":
-            # Réinitialiser la stratégie car le navire est coulé
-            self.hits = []
-            self.hit_stack = []
-            self.direction = None
+            # Trouver quels hits appartiennent au navire coulé
+            # Note: ceci suppose que board.shots contient toutes les positions déjà ciblées
+            sunk_ship = []
+            for pos in self.hits:
+                # Vérifier si ce hit appartient au navire qui vient d'être coulé
+                for ship in board.ships:
+                    if ship.name == result[1] and pos in ship.positions:
+                        sunk_ship.append(pos)
+            
+            # Mettre à jour notre état interne
+            for pos in sunk_ship:
+                # Retirer ces positions des hits actifs
+                if pos in self.hits:
+                    self.hits.remove(pos)
+                # Ajouter aux navires coulés
+                self.ships_sunk.append(pos)
+            
+            # Nettoyer toutes les cibles adjacentes à ce navire
+            self._clean_targets_around_sunk_ship(sunk_ship)
+            
+            # Réinitialiser les cibles si tous les navires actifs sont coulés
+            if not self.hits:
+                self.targets = []
     
-    def identify_direction(self):
-        """Identifie la direction du navire basée sur les touches existantes."""
-        # Vérifier si les touches sont alignées horizontalement
-        if all(hit[0] == self.hits[0][0] for hit in self.hits):
-            self.direction = "horizontal"
-        # Vérifier si les touches sont alignées verticalement
-        elif all(hit[1] == self.hits[0][1] for hit in self.hits):
-            self.direction = "vertical"
-    
-    def add_directional_targets(self, position, board):
-        """
-        Ajoute des cibles dans la direction identifiée.
-        
-        Args:
-            position (tuple): Position (x, y) du dernier tir réussi
-            board (Board): La grille de jeu
-        """
+    def _add_adjacent_targets(self, position, board):
+        """Ajoute des cibles adjacentes à une position."""
         x, y = position
-        # Vider la pile pour ne garder que les cibles dans la bonne direction
-        self.hit_stack = []
         
-        if self.direction == "horizontal":
-            # Trouver les extrémités actuelles pour ce navire
-            min_y = min(hit[1] for hit in self.hits)
-            max_y = max(hit[1] for hit in self.hits)
+        # Les 4 directions possibles
+        for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            target = (x + dx, y + dy)
             
-            # Ajouter la case à gauche de la ligne
-            left_pos = (x, min_y - 1)
-            if 0 <= min_y - 1 < board.size and left_pos not in board.shots:
-                self.hit_stack.append(left_pos)
-            
-            # Ajouter la case à droite de la ligne
-            right_pos = (x, max_y + 1)
-            if 0 <= max_y + 1 < board.size and right_pos not in board.shots:
-                self.hit_stack.append(right_pos)
-        
-        elif self.direction == "vertical":
-            # Trouver les extrémités actuelles pour ce navire
-            min_x = min(hit[0] for hit in self.hits)
-            max_x = max(hit[0] for hit in self.hits)
-            
-            # Ajouter la case au-dessus de la ligne
-            top_pos = (min_x - 1, y)
-            if 0 <= min_x - 1 < board.size and top_pos not in board.shots:
-                self.hit_stack.append(top_pos)
-            
-            # Ajouter la case en-dessous de la ligne
-            bottom_pos = (max_x + 1, y)
-            if 0 <= max_x + 1 < board.size and bottom_pos not in board.shots:
-                self.hit_stack.append(bottom_pos)
+            # Vérifier si la cible est valide
+            if (0 <= target[0] < board.size and 
+                0 <= target[1] < board.size and 
+                target not in board.shots and
+                target not in self.targets):
+                
+                # Essayer d'être intelligent sur l'ordre des cibles
+                # Si on a plusieurs hits, prioriser les cibles alignées
+                if len(self.hits) > 1:
+                    aligned = False
+                    for hit in self.hits:
+                        if hit != position:  # Différent du hit actuel
+                            # Vérifier si alignés horizontalement
+                            if hit[0] == position[0] and target[0] == position[0]:
+                                aligned = True
+                            # Vérifier si alignés verticalement
+                            elif hit[1] == position[1] and target[1] == position[1]:
+                                aligned = True
+                    
+                    # Si aligné, mettre en première position
+                    if aligned:
+                        self.targets.insert(0, target)
+                    else:
+                        self.targets.append(target)
+                else:
+                    # Sinon, juste ajouter à la fin
+                    self.targets.append(target)
     
-    def add_opposite_direction_targets(self, board):
-        """
-        Si un tir manque après avoir suivi une direction, essayez dans la direction opposée.
-        
-        Args:
-            board (Board): La grille de jeu
-        """
-        if not self.hits:
+    def _clean_targets_around_sunk_ship(self, sunk_ship):
+        """Nettoie les cibles autour d'un navire coulé."""
+        if not sunk_ship:
             return
+            
+        # Calculer toutes les positions adjacentes au navire coulé
+        adjacent_positions = set()
+        for pos in sunk_ship:
+            x, y = pos
+            for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                adjacent_positions.add((x + dx, y + dy))
         
-        if self.direction == "horizontal":
-            # Trouver les extrémités actuelles
-            hit_y_values = [hit[1] for hit in self.hits]
-            min_y = min(hit_y_values)
-            max_y = max(hit_y_values)
-            x = self.hits[0][0]  # La ligne est la même pour toutes les touches
-            
-            # Vider la pile et ajouter seulement dans la direction opposée
-            self.hit_stack = []
-            
-            # Si on a raté à droite, essayez à gauche
-            if (x, max_y + 1) in board.shots and (x, min_y - 1) not in board.shots and 0 <= min_y - 1 < board.size:
-                self.hit_stack.append((x, min_y - 1))
-            # Si on a raté à gauche, essayez à droite
-            elif (x, min_y - 1) in board.shots and (x, max_y + 1) not in board.shots and 0 <= max_y + 1 < board.size:
-                self.hit_stack.append((x, max_y + 1))
+        # Retirer les positions du navire lui-même
+        adjacent_positions = adjacent_positions - set(sunk_ship)
         
-        elif self.direction == "vertical":
-            # Trouver les extrémités actuelles
-            hit_x_values = [hit[0] for hit in self.hits]
-            min_x = min(hit_x_values)
-            max_x = max(hit_x_values)
-            y = self.hits[0][1]  # La colonne est la même pour toutes les touches
-            
-            # Vider la pile et ajouter seulement dans la direction opposée
-            self.hit_stack = []
-            
-            # Si on a raté en bas, essayez en haut
-            if (max_x + 1, y) in board.shots and (min_x - 1, y) not in board.shots and 0 <= min_x - 1 < board.size:
-                self.hit_stack.append((min_x - 1, y))
-            # Si on a raté en haut, essayez en bas
-            elif (min_x - 1, y) in board.shots and (max_x + 1, y) not in board.shots and 0 <= max_x + 1 < board.size:
-                self.hit_stack.append((max_x + 1, y))
+        # Retirer ces positions de nos cibles
+        self.targets = [t for t in self.targets if t not in adjacent_positions]
     
     def get_next_target(self, board):
         """
@@ -242,30 +206,62 @@ class HuntTargetStrategy(BaseStrategy):
             board (Board): La grille de jeu
             
         Returns:
-            tuple ou None: Position (x, y) à viser, ou None si pas de cible spécifique
+            tuple ou None: Position (x, y) à viser, ou None si pas de cible
         """
-        if self.hit_stack:
-            # S'il y a des cibles dans la pile, prendre la dernière ajoutée
-            next_move = self.hit_stack.pop()
-            if next_move in board.get_valid_moves():
-                return next_move
+        # Filtrer les cibles qui sont encore valides
+        valid_targets = [t for t in self.targets if t in board.get_valid_moves()]
+        
+        # Si nous avons des cibles valides, prendre la première
+        if valid_targets:
+            target = valid_targets[0]
+            self.targets.remove(target)
+            return target
+        
+        # Si on n'a pas de cible mais des hits, générer de nouvelles cibles
+        if self.hits and not valid_targets:
+            for hit in self.hits:
+                self._add_adjacent_targets(hit, board)
+            
+            # Réessayer de trouver une cible
+            return self.get_next_target(board)
+        
         return None
     
     def evaluate_move(self, move, board, data=None):
         """
-        Évalue un coup en donnant une priorité très élevée aux positions adjacentes aux touches.
+        Évalue un coup.
         
         Args:
             move (tuple): Position (x, y) du coup à évaluer
             board (Board): La grille de jeu actuelle
-            data (pandas.DataFrame, optional): Données historiques des parties
+            data (pandas.DataFrame, optional): Données historiques
             
         Returns:
-            float: Score très élevé pour les positions ciblées
+            float: Score d'évaluation du coup
         """
-        if move in self.hit_stack:
-            return 100.0  # Score très élevé pour les positions adjacentes aux touches
-        return 0.0
+        # Priorité absolue aux cibles dans notre liste
+        if move in self.targets:
+            return 100.0
+        
+        # Éviter les positions où on a déjà tiré et raté
+        if move in self.known_misses:
+            return -10.0
+        
+        # Vérifier si adjacent à un hit non coulé
+        for hit in self.hits:
+            x1, y1 = hit
+            x2, y2 = move
+            if (abs(x1 - x2) == 1 and y1 == y2) or (abs(y1 - y2) == 1 and x1 == x2):
+                return 80.0
+        
+        # Éviter de tirer près des positions où on a déjà coulé un navire
+        for pos in self.ships_sunk:
+            x1, y1 = pos
+            x2, y2 = move
+            if (abs(x1 - x2) <= 1 and abs(y1 - y2) <= 1):
+                return 0.1  # Score très faible, mais pas négatif
+        
+        return 0.0  # Score par défaut
 
 
 class HistoricalDataStrategy(BaseStrategy):

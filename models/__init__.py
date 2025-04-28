@@ -1,5 +1,5 @@
 """
-Modules de modèles pour le jeu de bataille navale.
+Modules de modèles.
 """
 
 from models.ship import Ship

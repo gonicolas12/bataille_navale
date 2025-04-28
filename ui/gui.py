@@ -1,5 +1,5 @@
 """
-Interface graphique pour le jeu de bataille navale.
+Interface graphique.
 """
 
 import tkinter as tk
@@ -19,7 +19,7 @@ from models.game_manager import GameManager
 from utils.game_statistics import GameStatistics
 
 class BattleshipGUI:
-    """Interface graphique pour le jeu de bataille navale."""
+    """Interface graphique pour le jeu."""
     
     def __init__(self, root):
         """

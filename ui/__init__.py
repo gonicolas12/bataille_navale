@@ -1,5 +1,5 @@
 """
-Modules d'interface utilisateur pour le jeu de bataille navale.
+Modules d'interface utilisateur.
 """
 
 from ui.gui import BattleshipGUI

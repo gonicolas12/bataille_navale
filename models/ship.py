@@ -1,9 +1,9 @@
 """
-Classe représentant un navire dans le jeu de bataille navale.
+Classe représentant un navire.
 """
 
 class Ship:
-    """Classe représentant un navire dans le jeu de bataille navale."""
+    """Classe représentant un navire dans le jeu"""
     
     def __init__(self, name, size):
         """
@@ -23,7 +23,7 @@ class Ship:
         Vérifie si le navire a été placé sur la grille.
         
         Returns:
-            bool: True si le navire est placé, False sinon
+            bool: True si le navire est placé, false sinon
         """
         return len(self.positions) == self.size
         
@@ -32,7 +32,7 @@ class Ship:
         Vérifie si le navire est coulé.
         
         Returns:
-            bool: True si le navire est coulé, False sinon
+            bool: True si le navire est coulé, false sinon
         """
         return len(self.hits) == self.size
     
@@ -52,13 +52,13 @@ class Ship:
     
     def hit(self, position):
         """
-        Enregistre un coup reçu et retourne True si le navire est touché, False sinon.
+        Enregistre un coup reçu et retourne True si le navire est touché, false sinon.
         
         Args:
             position (tuple): Position (x, y) du tir
             
         Returns:
-            bool: True si le navire est touché, False sinon
+            bool: True si le navire est touché, false sinon
         """
         if position in self.positions and position not in self.hits:
             self.hits.append(position)

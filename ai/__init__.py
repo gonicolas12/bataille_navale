@@ -1,5 +1,5 @@
 """
-Modules d'intelligence artificielle pour le jeu de bataille navale.
+Modules d'intelligence artificielle.
 """
 
 from ai.ai_player import AIPlayer

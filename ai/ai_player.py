@@ -1,5 +1,5 @@
 """
-Classe représentant le joueur IA pour le jeu de bataille navale.
+Classe pour le joueur IA.
 """
 
 import pandas as pd
@@ -59,17 +59,17 @@ class AIPlayer:
         if next_target:
             return next_target
         
-        # Différentes stratégies
+        # Différentes stratégies, plus le poids est élevé, plus la stratégie est prioritaire
         for move in valid_moves:
-            # 1. Stratégie du centre (poids: 1.0)
+            # Stratégie du centre (poids: 1.0)
             center_score = self.center_strategy.evaluate_move(move, board)
             self.moves_evaluation[move] += center_score * 1.0
             
-            # 2. Stratégie du damier (poids: 1.5)
+            # Stratégie du damier (poids: 1.5)
             checkerboard_score = self.checkerboard_strategy.evaluate_move(move, board)
             self.moves_evaluation[move] += checkerboard_score * 1.5
             
-            # 3. Stratégie basée sur l'historique des données (poids: 2.0)
+            # Stratégie basée sur l'historique des données (poids: 2.0)
             if not self.game_data.empty:
                 historical_score = self.historical_strategy.evaluate_move(move, board, self.game_data)
                 self.moves_evaluation[move] += historical_score * 2.0

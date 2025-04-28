@@ -1,5 +1,5 @@
 """
-Classe gérant le déroulement du jeu de bataille navale.
+Classe gérant le déroulement du jeu.
 """
 
 from datetime import datetime

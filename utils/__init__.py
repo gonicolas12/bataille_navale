@@ -1,5 +1,5 @@
 """
-Modules utilitaires pour le jeu de bataille navale.
+Modules utilitaires.
 """
 
 from utils.game_statistics import GameStatistics

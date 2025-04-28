@@ -1,5 +1,5 @@
 """
-Stratégies d'IA pour le jeu de bataille navale.
+Stratégies d'IA.
 """
 
 import random

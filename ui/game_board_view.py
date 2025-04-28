@@ -112,7 +112,7 @@ class GameBoardView:
         Définit la position survolée.
         
         Args:
-            position (tuple ou None): Position (x, y) survolée, ou None si aucune
+            position (tuple ou None): Position (x, y) survolée, ou none si aucune
         """
         self.hover_position = position
         self.draw()
@@ -136,7 +136,7 @@ class GameBoardView:
             y (int): Coordonnée Y en pixels
             
         Returns:
-            tuple ou None: Coordonnées (row, col) de la cellule, ou None si hors grille
+            tuple ou None: Coordonnées (row, col) de la cellule, ou none si hors grille
         """
         # Convertir les coordonnées en pixels en coordonnées de cellule
         row = (y - self.margin) // self.cell_size
@@ -152,7 +152,7 @@ class GameBoardView:
         Active ou désactive l'affichage des navires.
         
         Args:
-            show (bool, optional): Si True, affiche les navires. Par défaut True.
+            show (bool, optional): Si true, affiche les navires. Par défaut true.
         """
         self.show_ships = show
         self.draw()

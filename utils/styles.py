@@ -21,7 +21,7 @@ class Theme:
         "highlight": "#10b981",        # Vert turquoise
         "button": {
             "bg": "#3b82f6",           # Bleu primaire
-            "hover": "#2563eb",        # Bleu plus foncé
+            "hover": "#2563eb",        # Bleu foncé
             "fg": "#ffffff"            # Blanc
         }
     }

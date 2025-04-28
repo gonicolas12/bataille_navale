@@ -1,5 +1,5 @@
 """
-Classe représentant la grille de jeu de bataille navale.
+Classe représentant la grille de jeu.
 """
 
 import numpy as np

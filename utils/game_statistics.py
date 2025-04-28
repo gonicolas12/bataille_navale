@@ -1,5 +1,5 @@
 """
-Classe pour générer des statistiques sur les parties jouées de bataille navale.
+Classe pour générer des statistiques sur les parties jouées.
 """
 
 import pandas as pd
@@ -39,7 +39,7 @@ class GameStatistics:
         Returns:
             dict: Dictionnaire contenant le nombre de victoires par joueur
         """
-        # D'abord, on recharge les données pour avoir les plus récentes
+        # On recharge les données pour avoir les plus récentes
         self.reload_data()
         
         if self.game_data.empty:
@@ -169,7 +169,7 @@ class GameStatistics:
         if self.game_data.empty:
             return
         
-        # Configurer matplotlib pour un style moderne
+        # Configurer matplotlib
         plt.style.use('dark_background')
         
         # Créer une matrice 10x10 pour stocker le nombre de tirs à chaque position

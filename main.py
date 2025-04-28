@@ -1,5 +1,5 @@
 """
-Point d'entrée principal du jeu de Bataille Navale
+Point d'entrée principal du jeu.
 """
 
 import sys

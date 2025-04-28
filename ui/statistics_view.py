@@ -13,7 +13,6 @@ import pandas as pd
 class StatisticsView:
     """Classe pour l'affichage des statistiques de jeu."""
     
-    # Variable de classe pour suivre l'instance active de la fenêtre de statistiques
     stats_window_instance = None
     
     def __init__(self, parent, statistics_manager, colors=None):
@@ -29,7 +28,7 @@ class StatisticsView:
         self.stats_manager = statistics_manager
         self.stats_window = None
         
-        # Définir les couleurs par défaut si non fournies
+        # Définir les couleurs par défaut si non données
         self.colors = colors or {
             "background": "#0a192f",
             "text": "#e2e8f0",
@@ -67,7 +66,6 @@ class StatisticsView:
     
     def show_statistics_window(self):
         """Affiche une fenêtre avec les statistiques de jeu."""
-        # Vérifier si une fenêtre de statistiques est déjà ouverte
         if StatisticsView.stats_window_instance is not None:
             try:
                 # Si la fenêtre existe déjà, mettre au premier plan
@@ -86,7 +84,7 @@ class StatisticsView:
         self.stats_window.title("⚓ Statistiques Navales - Bataille Navale ⚓")
         
         # Maximiser la fenêtre au lieu d'utiliser le mode plein écran
-        self.stats_window.state('zoomed')  # Pour Windows
+        self.stats_window.state('zoomed')
                 
         # Configurer le gestionnaire de fermeture pour nettoyer la référence
         self.stats_window.protocol("WM_DELETE_WINDOW", self._on_closing)
@@ -121,11 +119,11 @@ class StatisticsView:
         )
         graphs_frame.pack(fill=tk.BOTH, expand=True, pady=10)
         
-        # Créer les figures pour matplotlib avec une taille plus grande et un style moderne
+        # Créer les figures pour matplotlib
         self._create_win_distribution_graph(graphs_frame)
         self._create_hit_rate_graph(graphs_frame)
         
-        # Frame pour les statistiques textuelles avec un fond légèrement différent
+        # Frame pour les statistiques textuelles
         text_stats_frame = Frame(main_frame, bg="#172a45")
         text_stats_frame.pack(fill=tk.X, pady=20)
         
@@ -241,7 +239,7 @@ class StatisticsView:
         # Configurer le style de matplotlib
         plt.style.use('dark_background')
         
-        # Créer la figure avec une taille plus grande
+        # Créer la figure
         fig = plt.figure(figsize=(5, 4), dpi=100)
         fig.patch.set_facecolor('#172a45')  # Couleur de fond
         
@@ -314,14 +312,14 @@ class StatisticsView:
         # Configurer le style de matplotlib
         plt.style.use('dark_background')
         
-        # Créer la figure avec une taille plus grande
+        # Créer la figure
         fig = plt.figure(figsize=(5, 4), dpi=100)
         fig.patch.set_facecolor('#172a45')  # Couleur de fond
         
         ax = fig.add_subplot(111)
         ax.set_facecolor('#172a45')  # Couleur de fond du graphique
         
-        # Couleurs modernes pour les barres
+        # Couleurs pour les barres
         colors = ['#60a5fa', '#f97316']
         
         # Tracer le graphique
@@ -336,8 +334,6 @@ class StatisticsView:
         
         # Configurer l'axe y
         ax.set_ylim(0, 100)
-        
-        # Grille plus subtile
         ax.grid(axis='y', linestyle='--', alpha=0.3, color='white')
         
         # Ajouter les valeurs sur les barres
@@ -372,10 +368,10 @@ class StatisticsView:
         # Créer le dossier data s'il n'existe pas
         os.makedirs("data", exist_ok=True)
         
-        # Générer la heatmap avec un style moderne
+        # Générer la heatmap
         file_path = "data/shots_heatmap.png"
         
-        # Configurer matplotlib pour un style moderne
+        # Configurer matplotlib
         plt.style.use('dark_background')
         
         # Charger les données pour la heatmap
@@ -405,14 +401,13 @@ class StatisticsView:
                         # Ignorer les positions mal formatées
                         pass
         
-        # Créer la figure avec un style moderne
+        # Créer la figure
         fig = plt.figure(figsize=(10, 8))
-        fig.patch.set_facecolor('#0a192f')  # Couleur de fond
-        
+        fig.patch.set_facecolor('#0a192f')
         ax = fig.add_subplot(111)
-        ax.set_facecolor('#172a45')  # Couleur de fond du graphique
+        ax.set_facecolor('#172a45')
         
-        # Améliorer l'apparence de la heatmap
+        # apparence de la heatmap
         cmap = plt.cm.hot  # Utiliser la colormap "hot" pour la heatmap
         img = ax.imshow(heatmap_data, cmap=cmap, interpolation='nearest')
         
@@ -428,7 +423,6 @@ class StatisticsView:
         ax.set_xlabel('Colonne (A-J)', color='white', fontsize=12, labelpad=10)
         ax.set_ylabel('Ligne (1-10)', color='white', fontsize=12, labelpad=10)
         
-        # Ajout des indices de lignes et colonnes
         # Convertir les indices de colonnes en lettres (A-J)
         column_labels = [chr(65 + i) for i in range(10)]
         ax.set_xticks(np.arange(10))
@@ -450,7 +444,6 @@ class StatisticsView:
         plt.savefig(file_path, dpi=150, bbox_inches='tight')
         plt.close()
         
-        # Informer l'utilisateur avec une boîte de dialogue
         self._show_info_dialog(
             "Heatmap Générée",
             f"Heatmap générée avec succès !\nFichier sauvegardé: {file_path}"
@@ -465,7 +458,6 @@ class StatisticsView:
         file_path = "data/statistics_report.txt"
         self.stats_manager.export_statistics_report(file_path)
         
-        # Informer l'utilisateur avec une boîte de dialogue
         self._show_info_dialog(
             "Rapport Exporté",
             f"Rapport exporté avec succès !\nFichier sauvegardé: {file_path}"
@@ -550,5 +542,4 @@ class StatisticsView:
         
         # Lier la touche Entrée au bouton OK
         dialog.bind("<Return>", lambda event: dialog.destroy())
-        
         dialog.wait_window()

@@ -360,7 +360,7 @@ class StatisticsView:
             text="Taux de Réussite des Tirs",
             font=(self.title_font, 14, "bold"),
             bg=self.colors["background"],
-            fg="#60a5fa"  # Bleu ciel
+            fg="#60a5fa"
         ).pack(pady=(15, 5))
     
     def _generate_heatmap(self):

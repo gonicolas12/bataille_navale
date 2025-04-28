@@ -10,7 +10,7 @@ class BaseStrategy:
     
     def evaluate_move(self, move, board, data=None):
         """
-        Évalue un coup possible.
+        Evalue un coup possible.
         
         Args:
             move (tuple): Position (x, y) du coup à évaluer
@@ -28,7 +28,7 @@ class RandomStrategy(BaseStrategy):
     
     def evaluate_move(self, move, board, data=None):
         """
-        Évalue un coup de manière aléatoire.
+        Evalue un coup de manière aléatoire.
         
         Args:
             move (tuple): Position (x, y) du coup à évaluer
@@ -46,7 +46,7 @@ class CenterWeightStrategy(BaseStrategy):
     
     def evaluate_move(self, move, board, data=None):
         """
-        Évalue un coup en favorisant le centre de la grille.
+        Evalue un coup en favorisant le centre de la grille.
         
         Args:
             move (tuple): Position (x, y) du coup à évaluer
@@ -71,7 +71,7 @@ class CheckerboardStrategy(BaseStrategy):
     
     def evaluate_move(self, move, board, data=None):
         """
-        Évalue un coup en favorisant un motif en damier.
+        Evalue un coup en favorisant un motif en damier.
         
         Args:
             move (tuple): Position (x, y) du coup à évaluer
@@ -127,7 +127,7 @@ class HuntTargetStrategy(BaseStrategy):
                     if ship.name == result[1] and pos in ship.positions:
                         sunk_ship.append(pos)
             
-            # Mettre à jour notre état interne
+            # Mettre à jour l'état interne
             for pos in sunk_ship:
                 # Retirer ces positions des hits actifs
                 if pos in self.hits:
@@ -156,11 +156,11 @@ class HuntTargetStrategy(BaseStrategy):
                 target not in board.shots and
                 target not in self.targets):
                 
-                # Si on a plusieurs hits, prioriser les cibles alignées
+                # Si on a plusieurs hits prioriser les cibles alignées
                 if len(self.hits) > 1:
                     aligned = False
                     for hit in self.hits:
-                        if hit != position:  # Différent du hit actuel
+                        if hit != position:
                             # Vérifier si alignés horizontalement
                             if hit[0] == position[0] and target[0] == position[0]:
                                 aligned = True
@@ -226,7 +226,7 @@ class HuntTargetStrategy(BaseStrategy):
     
     def evaluate_move(self, move, board, data=None):
         """
-        Évalue un coup.
+        Evalue un coup.
         
         Args:
             move (tuple): Position (x, y) du coup à évaluer
@@ -240,7 +240,7 @@ class HuntTargetStrategy(BaseStrategy):
         if move in self.targets:
             return 100.0
         
-        # Éviter les positions où on a déjà tiré et raté
+        # Eviter les positions où on a déjà tiré et raté
         if move in self.known_misses:
             return -10.0
         
@@ -251,7 +251,7 @@ class HuntTargetStrategy(BaseStrategy):
             if (abs(x1 - x2) == 1 and y1 == y2) or (abs(y1 - y2) == 1 and x1 == x2):
                 return 80.0
         
-        # Éviter de tirer près des positions où on a déjà coulé un navire
+        # Eviter de tirer près des positions où on a déjà coulé un navire
         for pos in self.ships_sunk:
             x1, y1 = pos
             x2, y2 = move
@@ -266,7 +266,7 @@ class HistoricalDataStrategy(BaseStrategy):
     
     def evaluate_move(self, move, board, data=None):
         """
-        Évalue un coup en utilisant les données historiques.
+        Evalue un coup en utilisant les données historiques.
         
         Args:
             move (tuple): Position (x, y) du coup à évaluer

@@ -18,7 +18,7 @@ class Board:
         self.size = size
         self.grid = np.zeros((size, size), dtype=int)
         self.ships = []
-        self.shots = []  # Liste des coups joués [(x, y), ...]
+        self.shots = []  # Liste des coups joués
         
     def add_ship(self, ship):
         """
@@ -30,7 +30,7 @@ class Board:
         self.ships.append(ship)
         for pos in ship.positions:
             x, y = pos
-            self.grid[x][y] = 1  # 1 indique la présence d'un navire
+            self.grid[x][y] = 1  # 1 = navire présent
     
     def place_ship_randomly(self, ship):
         """
@@ -44,7 +44,7 @@ class Board:
         """
         placed = False
         attempts = 0
-        max_attempts = 100  # Éviter les boucles infinies
+        max_attempts = 100  # Eviter les boucles infinies
         
         while not placed and attempts < max_attempts:
             attempts += 1
@@ -96,12 +96,12 @@ class Board:
         # Vérifier si un navire est touché
         for ship in self.ships:
             if ship.hit(position):
-                self.grid[x][y] = 2  # 2 indique un navire touché
+                self.grid[x][y] = 2  # 2 = un navire touché
                 if ship.is_sunk():
                     return "sunk", ship.name
                 return "hit"
         
-        self.grid[x][y] = -1  # -1 indique un tir dans l'eau
+        self.grid[x][y] = -1  # -1 = un tir dans l'eau
         return "miss"
     
     def all_ships_sunk(self):

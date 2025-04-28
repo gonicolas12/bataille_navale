@@ -14,7 +14,7 @@ Ce fichier contient l'historique de toutes les parties jouées, avec les informa
 - `position` : Position du tir (format: "x,y")
 - `result` : Résultat du tir ('miss', 'hit', 'sunk')
 - `timestamp` : Horodatage de l'action (format: YYYY-MM-DD HH:MM:SS)
-- `game_state` : État du jeu au moment de l'action (format compressé des positions des tirs)
+- `game_state` : Etat du jeu au moment de l'action (format compressé des positions des tirs)
 
 ### Exemple
 

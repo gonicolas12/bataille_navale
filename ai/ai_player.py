@@ -41,7 +41,7 @@ class AIPlayer:
     
     def evaluate_moves(self, board):
         """
-        Évalue tous les coups possibles et retourne le meilleur.
+        Evalue tous les coups possibles et retourne le meilleur.
         
         Args:
             board (Board): La grille de jeu de l'adversaire

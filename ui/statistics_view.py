@@ -146,9 +146,7 @@ class StatisticsView:
         
         stats_text = (
             f"🎮 Parties jouées: {total_games}   |   "
-            f"⏱️ Durée moyenne: {avg_game_length:.1f} tours   |   "
-            f"🏆 Victoires joueur: {wins['player']}   |   "
-            f"🤖 Victoires IA: {wins['ai']}"
+            f"⏱️ Durée moyenne: {avg_game_length:.1f} tours"
         )
         stats_label.config(text=stats_text)
         
